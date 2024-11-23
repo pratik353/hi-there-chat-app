@@ -21,15 +21,10 @@ const userSchema = new mongoose.Schema(
     profilePic: {
       type: String,
     },
-    conversations:{
-      type: [mongoose.Schema.Types.ObjectId],
-      ref:'conversation'
-    }
   },
   {
     timestamps: true,
   }
 );
 
-
-export const UserModel = mongoose.model('User', userSchema)
+export const UserModel = mongoose.model("User", userSchema);

@@ -1,0 +1,17 @@
+
+register user:-
+
+login user:- as soon as user logged in make him online ( create socket connection with server)
+
+If there is no any conversation with any other user,
+then user can create a new conversation with selecting user and create a new conversation with that user.
+also user can create group from selected users and create a group conversation with that group.
+
+on clicking on particular user or group, 
+    join socket ROOM with that conversation._id;
+    get all messages of that conversation._id;
+    display all messages in chat window;
+    When that user sends new message in that group that should be store in room and
+    emit in that conversationID socket room.
+    
+user can see all the conversation history with that user or group.

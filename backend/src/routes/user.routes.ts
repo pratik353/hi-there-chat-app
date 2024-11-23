@@ -3,6 +3,7 @@ import zod from "zod";
 import { UserModel } from "../models/user.schema";
 import bcrypt from "bcrypt";
 import { HTTPError } from "../helper/error";
+import { userMiddleware } from "../middlewares/userMiddleware";
 
 const userRouter = Router();
 
@@ -14,11 +15,6 @@ const userRegisterSchema = zod.object({
 });
 
 // type user = zod.infer<typeof userRegisterSchema>;
-
-userRouter.get("/", async (req, res) => {
-  const users = await UserModel.find().select("-password");
-  res.json({ data: users });
-});
 
 userRouter.post("/register", async (req, res) => {
   const payload = req.body;
@@ -46,10 +42,8 @@ userRouter.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    res.json({ message: "register user successfully", newUser });
-
+    res.json({ message: "register user successfully" });
   } catch (error: any) {
-
     if (error instanceof HTTPError) {
       res.status(error.code).send({
         success: false,
@@ -62,7 +56,30 @@ userRouter.post("/register", async (req, res) => {
       });
     }
   }
-  
+});
+
+userRouter.get("/:userId", userMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+  const user = await UserModel.findById(userId).select("-password");
+  res.json({ data: user });
+});
+
+userRouter.get("/", userMiddleware, async (req, res) => {
+  const user = req.user;
+  const users = await UserModel.find({ _id: { $ne: user?._id } }).select(
+    "-password"
+  );
+  res.json({ data: users });
+});
+
+userRouter.put("/:userId", userMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+  const payload = req.body;
+
+  const user = await UserModel.findByIdAndUpdate(userId, {
+    $set: payload,
+  });
+  res.json({ message: "User updated successfully", success: true });
 });
 
 export default userRouter;

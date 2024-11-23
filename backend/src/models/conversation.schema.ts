@@ -1,26 +1,36 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
+
 
 const conversationSchema = new mongoose.Schema(
   {
     participants: {
       type: [mongoose.Schema.ObjectId],
-      ref:"User"
+      ref: "User",
     },
     isGroup: {
       type: Boolean,
+      default: false,
     },
     groupName: {
       type: String,
+      default: "",
     },
-    isPublic: {
+    //TODO
+    isPrivate: {
       type: Boolean,
+      default: true,
     },
     groupImage: {
       type: String,
+      default: "",
     },
-    admin:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'User'
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    messages:{
+      type:[mongoose.Schema.Types.ObjectId],
+      ref:'Message'
     }
   },
   {
@@ -28,5 +38,7 @@ const conversationSchema = new mongoose.Schema(
   }
 );
 
-
-export const ConversationModel = mongoose.model('Conversation', conversationSchema)
+export const ConversationModel = mongoose.model(
+  "Conversation",
+  conversationSchema
+);

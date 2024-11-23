@@ -18,7 +18,7 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    msgByUserId: {
+    sender: {
       type: mongoose.Schema.ObjectId,
       required: true,
       ref: "User",
@@ -35,3 +35,5 @@ const messageSchema = new mongoose.Schema(
 );
 
 const MessageModel = mongoose.model("Message", messageSchema);
+
+export default MessageModel;
