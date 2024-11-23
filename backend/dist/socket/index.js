@@ -26,6 +26,7 @@ var SOCKET_EVENTS;
     SOCKET_EVENTS["NEW_MESSAGE"] = "newmessage";
     SOCKET_EVENTS["ONLINE_USERS"] = "onlineusers";
     SOCKET_EVENTS["PREV_MESSAGES"] = "prevmessages";
+    SOCKET_EVENTS["LEAVE_ROOM"] = "leaveroom";
 })(SOCKET_EVENTS || (SOCKET_EVENTS = {}));
 const port = 3000;
 exports.app = (0, express_1.default)();
@@ -75,6 +76,9 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
         catch (error) {
             console.log("Socket Error:- ", error);
         }
+    }));
+    socket.on(SOCKET_EVENTS.LEAVE_ROOM, (conversationId) => __awaiter(void 0, void 0, void 0, function* () {
+        socket.leave(conversationId);
     }));
     socket.on(SOCKET_EVENTS.NEW_MESSAGE, (event) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(event, "new-message");

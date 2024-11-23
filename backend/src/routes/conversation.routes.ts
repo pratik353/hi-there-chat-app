@@ -18,22 +18,32 @@ conversationRouter.get("/user/:userId", userMiddleware, async (req, res) => {
   const type = req.query.type;
 
   try {
-    const userConversations = await ConversationModel.find(
-      /* {
-        participants: { $in: [userId] },
-      } */
-      {
-        $and: [
-          { participants: { $in: [userId] } }, // Check if userId is in participants
-          { isGroup: type == "groups" ? true : false }, // Check if conversation is active
-        ],
-      }
-    ).populate(
+    const userConversations = await ConversationModel.find({
+      $and: [
+        { participants: { $in: [userId] } }, // Check if userId is in participants
+        { isGroup: type == "groups" ? true : false }, // Check if conversation is active
+      ],
+    }).populate(
       "participants",
       "_id name email groupName groupImage admin profilePic"
     );
 
-    res.json({ data: userConversations });
+    let publicGroups: any[] = [];
+
+    if (type == "groups") {
+      publicGroups = await ConversationModel.find({
+        $and: [
+          { participants: { $nin: [userId] } }, // Check if userId is in participants
+          { isGroup: true }, // Check if conversation is active
+          { isPublic: true }, // Check if conversation is active
+        ],
+      }).populate(
+        "participants",
+        "_id name email groupName groupImage admin profilePic"
+      );
+    }
+
+    res.json({ data: [...userConversations, ...publicGroups] });
   } catch (error) {
     console.log(error);
   }
@@ -78,7 +88,7 @@ conversationRouter.post("/", userMiddleware, async (req, res) => {
       res.status(400).json({ error: validationRes.error.issues });
       return;
     }
-    const { participants, groupName, isPrivate, groupImage } = payload;
+    const { participants, groupName, isPublic, groupImage } = payload;
 
     let inputData: any = {
       participants,
@@ -90,6 +100,7 @@ conversationRouter.post("/", userMiddleware, async (req, res) => {
         isGroup: true,
         groupName: groupName,
         groupImage: groupImage,
+        isPublic: isPublic,
         admin: user?._id,
       };
     }
@@ -113,6 +124,27 @@ conversationRouter.put("/:id", userMiddleware, async (req, res) => {
   const payload = req.body;
 
   try {
+
+    if (payload.joinId) {
+      const conversation = await ConversationModel.findByIdAndUpdate(
+        conversationId,
+        { $push: { participants: Array.isArray(payload.joinId) ? payload.joinId : [payload.joinId] } },
+      );
+
+      res.json({ success: true });
+      return ;
+    }
+
+    if (payload.leaveId) {
+      const conversation = await ConversationModel.findByIdAndUpdate(
+        conversationId,
+        { $pull: { participants: payload.leaveId } }
+      );
+
+      res.json({ success: true });
+      return ;
+    }
+
     const conversation = await ConversationModel.findByIdAndUpdate(
       conversationId,
       {

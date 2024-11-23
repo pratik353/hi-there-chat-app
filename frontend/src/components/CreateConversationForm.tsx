@@ -14,6 +14,7 @@ import { Button } from "./ui/button";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useCreateConversation, useGetUsers } from "@/services/axiosServices";
+import Toggle from "./ui/toggle";
 
 type Props = {
   isOpen: boolean;
@@ -25,14 +26,16 @@ const CreateConversationForm = ({ tab, isOpen, onClose }: Props) => {
   const loggedInUser = JSON.parse(localStorage.getItem("user") ?? "");
 
   const { data } = useGetUsers();
+  const users = data?.data;
+  
   const { mutate } = useCreateConversation();
 
-  const users = data?.data;
 
   const inputRef = useRef(null);
 
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [groupName, setGroupName] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [searchKey, setSearchKey] = useState("");
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
 
@@ -90,7 +93,7 @@ const CreateConversationForm = ({ tab, isOpen, onClose }: Props) => {
   const handleCreateConversation = async () => {
     if (selectedUsers.length <= 0) return toast.error("Please Select User.");
 
-    if (!groupName) return toast.error("Please Enter Group Name");
+    if (tab == "groups" && !groupName) return toast.error("Please Enter Group Name");
 
     let formData: any = {
       participants: [...selectedUsers.map((u) => u._id), loggedInUser.id],
@@ -101,6 +104,7 @@ const CreateConversationForm = ({ tab, isOpen, onClose }: Props) => {
         ...formData,
         groupName: groupName,
         groupImage: imageUrl,
+        isPublic: isPublic,
         type: "group",
       };
     }
@@ -187,6 +191,7 @@ const CreateConversationForm = ({ tab, isOpen, onClose }: Props) => {
                   onChange={handleChange}
                   label="Group name"
                 />
+                <Toggle className="" label="Public Group" checked={isPublic} onChange={(event)=>setIsPublic(event.target.checked)} />
                 <div
                   className="w-full h-[8rem] border rounded-lg bg-slate-200 cursor-pointer"
                   onClick={handleUploadImage}

@@ -23,7 +23,7 @@ app.use("/api/v1/conversation", conversationRouter);
 async function init() {
   await new Promise((resolve) => {
     // server.listen(80,/* "192.168.101.5" */, () => {
-    server.listen(3000/* "192.168.101.5" */, () => {
+    server.listen(3000, () => {
       console.log(`Example app listening at http://localhost:${port}`);
       resolve("");
     });

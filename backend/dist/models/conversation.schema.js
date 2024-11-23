@@ -19,9 +19,9 @@ const conversationSchema = new mongoose_1.default.Schema({
         default: "",
     },
     //TODO
-    isPrivate: {
+    isPublic: {
         type: Boolean,
-        default: true,
+        default: false,
     },
     groupImage: {
         type: String,

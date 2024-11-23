@@ -29,17 +29,23 @@ exports.conversationRouter.get("/user/:userId", userMiddleware_1.userMiddleware,
     const userId = req.params.userId;
     const type = req.query.type;
     try {
-        const userConversations = yield conversation_schema_1.ConversationModel.find(
-        /* {
-          participants: { $in: [userId] },
-        } */
-        {
+        const userConversations = yield conversation_schema_1.ConversationModel.find({
             $and: [
                 { participants: { $in: [userId] } },
                 { isGroup: type == "groups" ? true : false }, // Check if conversation is active
             ],
         }).populate("participants", "_id name email groupName groupImage admin profilePic");
-        res.json({ data: userConversations });
+        let publicGroups = [];
+        if (type == "groups") {
+            publicGroups = yield conversation_schema_1.ConversationModel.find({
+                $and: [
+                    { participants: { $nin: [userId] } },
+                    { isGroup: true },
+                    { isPublic: true }, // Check if conversation is active
+                ],
+            }).populate("participants", "_id name email groupName groupImage admin profilePic");
+        }
+        res.json({ data: [...userConversations, ...publicGroups] });
     }
     catch (error) {
         console.log(error);
@@ -79,12 +85,12 @@ exports.conversationRouter.post("/", userMiddleware_1.userMiddleware, (req, res)
             res.status(400).json({ error: validationRes.error.issues });
             return;
         }
-        const { participants, groupName, isPrivate, groupImage } = payload;
+        const { participants, groupName, isPublic, groupImage } = payload;
         let inputData = {
             participants,
         };
         if (type == "group") {
-            inputData = Object.assign(Object.assign({}, inputData), { isGroup: true, groupName: groupName, groupImage: groupImage, admin: user === null || user === void 0 ? void 0 : user._id });
+            inputData = Object.assign(Object.assign({}, inputData), { isGroup: true, groupName: groupName, groupImage: groupImage, isPublic: isPublic, admin: user === null || user === void 0 ? void 0 : user._id });
         }
         const conversation = yield conversation_schema_1.ConversationModel.create(inputData);
         conversation.save();
@@ -102,6 +108,16 @@ exports.conversationRouter.put("/:id", userMiddleware_1.userMiddleware, (req, re
     const conversationId = req.params.id;
     const payload = req.body;
     try {
+        if (payload.joinId) {
+            const conversation = yield conversation_schema_1.ConversationModel.findByIdAndUpdate(conversationId, { $push: { participants: Array.isArray(payload.joinId) ? payload.joinId : [payload.joinId] } });
+            res.json({ success: true });
+            return;
+        }
+        if (payload.leaveId) {
+            const conversation = yield conversation_schema_1.ConversationModel.findByIdAndUpdate(conversationId, { $pull: { participants: payload.leaveId } });
+            res.json({ success: true });
+            return;
+        }
         const conversation = yield conversation_schema_1.ConversationModel.findByIdAndUpdate(conversationId, {
             $set: payload,
         });

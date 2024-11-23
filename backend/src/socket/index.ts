@@ -16,6 +16,7 @@ enum SOCKET_EVENTS {
   NEW_MESSAGE = "newmessage",
   ONLINE_USERS = "onlineusers",
   PREV_MESSAGES = "prevmessages",
+  LEAVE_ROOM = "leaveroom",
 }
 
 const port = 3000;
@@ -88,6 +89,10 @@ io.on("connection", async (socket: Socket) => {
       console.log("Socket Error:- ", error)      
     }
   });
+
+  socket.on(SOCKET_EVENTS.LEAVE_ROOM, async (conversationId) => {
+    socket.leave(conversationId);
+  })
 
   socket.on(SOCKET_EVENTS.NEW_MESSAGE, async (event) => {
     console.log(event, "new-message");

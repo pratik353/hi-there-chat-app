@@ -4,15 +4,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import InputField from "./form/InputField";
 import { cloudinaryUrl } from "@/services/api";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { useUpdateConversation } from "@/services/axiosServices";
-import { Check, Pencil } from "lucide-react";
+import { useGetUsers, useUpdateConversation } from "@/services/axiosServices";
+import { Check, Pencil, X } from "lucide-react";
+import { Button } from "./ui/button";
 
 type Props = {
   isOpen: boolean;
@@ -21,10 +21,16 @@ type Props = {
 };
 
 const ConversationInfo = ({ isOpen, onClose, data }: Props) => {
+  const loggedInUser = JSON.parse(localStorage.getItem("user") ?? "");
+
+  const { data: usersData } = useGetUsers();
+  const users = usersData?.data;
+
   const { mutate } = useUpdateConversation();
 
   const inputRef = useRef(null);
 
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [editName, setEditName] = React.useState(false);
   const [name, setName] = React.useState(data?.groupName || "");
   const [imageUrl, setImageUrl] = useState<string | undefined>(
@@ -66,12 +72,11 @@ const ConversationInfo = ({ isOpen, onClose, data }: Props) => {
             },
             onSuccess: (res) => {
               if (res.data.data.success) {
-                console.log("image uploaded");
+                toast.success("Group image updated");
               }
             },
           }
         );
-        toast.success("Profile picture updated");
       } catch (error) {
         toast.error(error?.message);
       }
@@ -149,20 +154,112 @@ const ConversationInfo = ({ isOpen, onClose, data }: Props) => {
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-4 p-2 border-2 rounded-md"
+                className="flex justify-between items-center border-2 rounded-md"
               >
-                <Avatar>
-                  <AvatarImage
-                    src={member.profilePic || ""}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <AvatarFallback>{member.name?.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <p className="text-md font-semibold">{member.name}</p>
+                <div className="flex items-center gap-4 p-2">
+                  <Avatar>
+                    <AvatarImage
+                      src={member.profilePic || ""}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <AvatarFallback>{member.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <p className="text-md font-semibold">{member.name} </p>
+                  <p className="text-sm font-light">{data?.admin == member._id ? 'Group creator' : ''} </p>
+                </div>
+                {loggedInUser.id == data?.admin && data?.admin != member._id ? <div className="pr-4">
+                  <X className="cursor-pointer text-red-500" onClick={()=>{
+                    mutate(
+                      {
+                        _id: data?._id,
+                        leaveId: member?._id,
+                      },
+                      {
+                        onError: (err) => {
+                          toast.error(err.response.data.message);
+                        },
+                        onSuccess: (res) => {
+                          if (res.data.data.success) {
+                            toast.success("user removed Successfully");
+                          }
+                        },
+                      }
+                    );
+                  }}/>
+                </div> : null }
               </div>
             );
           })}
         </div>
+        {!data?.isPublic && loggedInUser.id == data?.admin ? (
+          <div>
+            {users?.length > 0 ? (
+              users?.map((member) => {
+                return (
+                  <div
+                    key={member._id}
+                    className={`flex p-2 items-center gap-3 my-1 ${
+                      selectedUsers.includes(member)
+                        ? "bg-blue-400"
+                        : "bg-gray-200"
+                    } rounded-md cursor-pointer ${
+                      data?.participants.map((u) => u._id).includes(member._id)
+                        ? "pointer-events-none cursor-not-allowed opacity-50"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      if (selectedUsers.includes(member)) {
+                        setSelectedUsers(
+                          selectedUsers.filter(
+                            (user) => user._id !== member._id
+                          )
+                        );
+                      } else {
+                        setSelectedUsers((prev) => [...prev, member]);
+                      }
+                    }}
+                  >
+                    <img
+                      src={member.profilePic || ""}
+                      alt="avatar"
+                      className="w-10 h-10 rounded-full border-2"
+                    />
+                    <p className="text-md font-semibold">{member.name}</p>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-lg text-gray-400">No users found</p>
+            )}
+            <div className="flex justify-center">
+              <Button
+                onClick={() => {
+                  if (selectedUsers.length <= 0)
+                    return toast.error("Please select at-least one user");
+
+                  mutate(
+                    {
+                      _id: data?._id,
+                      joinId: selectedUsers.map((u) => u._id),
+                    },
+                    {
+                      onError: (err) => {
+                        toast.error(err.response.data.message);
+                      },
+                      onSuccess: (res) => {
+                        if (res.data.data.success) {
+                          toast.success("Member added Successfully");
+                        }
+                      },
+                    }
+                  );
+                }}
+              >
+                Add Members
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
