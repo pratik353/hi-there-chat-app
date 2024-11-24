@@ -27,7 +27,7 @@ const { Server } = require("socket.io");
 
 const io = new Server(server, {
   cors: {
-    origin: "https://35.160.120.126",
+    origin: "https://hi-there-7t7k.onrender.com/",
     methods: ["GET", "POST"],
   },
 });
