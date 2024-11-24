@@ -63,7 +63,7 @@ cd frontend && npm run dev
 Create a .env file in the backend folder with the following keys:
 
 ```
-PORT=5000
+PORT=3000
 MONGO_URI=<your-mongodb-connection-string>
 ```
 
@@ -72,24 +72,20 @@ MONGO_URI=<your-mongodb-connection-string>
 configure .env in the frontend folder for environment-specific variables like the backend API URL:
 
 ```
-REACT_APP_BACKEND_URL=<you-backend-url>
+VITE_CLOUDINARY_CLOUD_NAME=<cloud-name>
+VITE_CLOUDINARY_UPLOAD_PRESET=<upload-preset>
 ```
 
 ## Troubleshooting
 
 ### Common Issues and Solutions
 
-1. Frontend not connecting to the backend:
-
-    Ensure the REACT_APP_BACKEND_URL in the frontend .env file matches the backend server URL.
-    Verify that the backend server is running and accessible.
-    
-2. TypeScript compilation errors:
+1. TypeScript compilation errors:
 
     Ensure all required TypeScript dependencies are installed.
     Run npx tsc --watch to monitor and fix compilation errors in real-time.
     
-3. MongoDB connection issues:
+2. MongoDB connection issues:
 
     Verify the MONGO_URI in the backend .env file is correct.
     
