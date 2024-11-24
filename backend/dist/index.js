@@ -19,21 +19,28 @@ const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const db_1 = require("./db");
 const socket_1 = require("./socket");
 const conversation_routes_1 = require("./routes/conversation.routes");
-const port = 3000;
+const path_1 = __importDefault(require("path"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const PORT = process.env.PORT || 3000;
 socket_1.app.use((0, cors_1.default)());
 socket_1.app.use(express_1.default.json());
-socket_1.app.get("/", (req, res) => {
+socket_1.app.get("/api/status", (req, res) => {
     res.json({ message: "Server is running" });
 });
 socket_1.app.use("/api/v1/auth", auth_routes_1.default);
 socket_1.app.use("/api/v1/user", user_routes_1.default);
 socket_1.app.use("/api/v1/conversation", conversation_routes_1.conversationRouter);
+socket_1.app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/dist")));
+socket_1.app.get("*", (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, "../../frontend/dist/index.html"));
+});
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         yield new Promise((resolve) => {
             // server.listen(80,/* "192.168.101.5" */, () => {
-            socket_1.server.listen(3000, () => {
-                console.log(`Example app listening at http://localhost:${port}`);
+            socket_1.server.listen(PORT, () => {
+                console.log(`Example app listening at PORT:${PORT}`);
                 resolve("");
             });
         });

@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import InputField from "./form/InputField";
-import { authInstance, cloudinaryUrl } from "@/services/api";
+import { cloudinaryUrl, UPLOAD_PRESET } from "@/services/api";
 import { Button } from "./ui/button";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -58,7 +57,7 @@ const CreateConversationForm = ({ tab, isOpen, onClose }: Props) => {
       try {
         const formData = new FormData();
         formData.append("file", pickedFile);
-        formData.append("upload_preset", "hi-there");
+        formData.append("upload_preset", UPLOAD_PRESET);
         const response = await axios.post(cloudinaryUrl, formData);
 
         setImageUrl(response.data.secure_url);

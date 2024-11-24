@@ -112,7 +112,7 @@ export default function Layout() {
                 onClick={() => setOpenUserInfo(true)}
               >
                 <TooltipComponent text={"Profile"}>
-                  <Avatar>
+                  <Avatar className="border-2">
                     <AvatarImage
                       src={userDetails?.data?.profilePic}
                       className=" object-cover"

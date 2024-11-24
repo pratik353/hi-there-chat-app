@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import InputField from "./form/InputField";
-import { cloudinaryUrl } from "@/services/api";
+import { cloudinaryUrl, UPLOAD_PRESET } from "@/services/api";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -49,7 +48,7 @@ const EditInfo = ({ isOpen, onClose, data }: Props) => {
       try {
         const formData = new FormData();
         formData.append("file", pickedFile);
-        formData.append("upload_preset", "hi-there");
+        formData.append("upload_preset", UPLOAD_PRESET);
         const response = await axios.post(cloudinaryUrl, formData);
 
         setImageUrl(response.data.secure_url);

@@ -2,7 +2,7 @@ import InputField from "@/components/form/InputField";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/redux/store/store";
-import { cloudinaryUrl } from "@/services/api";
+import { cloudinaryUrl, UPLOAD_PRESET } from "@/services/api";
 import { PlusCircle, Trash, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -103,7 +103,7 @@ const MessagePage = () => {
       try {
         const formData = new FormData();
         formData.append("file", pickedFile);
-        formData.append("upload_preset", "hi-there");
+        formData.append("upload_preset", UPLOAD_PRESET);
         const promise = new Promise((res, rej) => {
           const response = axios.post(cloudinaryUrl, formData);
           res(response);

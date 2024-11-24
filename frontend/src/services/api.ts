@@ -1,11 +1,10 @@
 import axios from "axios";
 
-// const baseUrl = "http://192.168.101.5:80/api/v1/";
-const baseUrl = "http://localhost:3000/api/v1/";
-export const socketUrl = "ws://localhost:3000/";
+const baseUrl =  "/api/v1/";  
+export const socketUrl = "ws://";
 
-export const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dzxnhfjsz/auto/upload`
-
+export const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/auto/upload`;
+export const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const instance = axios.create({
   baseURL: baseUrl,
