@@ -37,6 +37,8 @@ io.on("connection", async (socket: Socket) => {
   const token = socket.handshake.auth.token;
   const socketId = socket.id;
 
+  console.log('online users', onlineUser);
+
   const user = await UserModel.findOne({
     token: token,
   }).select("-password");
