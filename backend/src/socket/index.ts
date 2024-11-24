@@ -53,6 +53,8 @@ io.on("connection", async (socket: Socket) => {
   socket.on("error", console.error);
 
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
+    console.log('disconnected USer:', user?.email)
+
     onlineUser.delete(user._id);
 
     io.emit(
@@ -65,6 +67,8 @@ io.on("connection", async (socket: Socket) => {
       socket.leave(room);
       socket.rooms.delete(room);
     });
+
+    console.log('User in Rooms :', socket.rooms)
 
     socket.disconnect(true);
   });
@@ -89,6 +93,8 @@ io.on("connection", async (socket: Socket) => {
 
   // ADD NEW MESSAGE IN DB AND SEND TO ALL USERS IN ROOM
   socket.on(SOCKET_EVENTS.NEW_MESSAGE, async (event) => {
+    console.log('new Message:', 'User:', user?.email)
+    
     const { conversationId, message, type, mediaUrl } = event;
 
     if (!conversationId) return;
@@ -123,14 +129,18 @@ io.on("connection", async (socket: Socket) => {
 
   // JOIN SOCKET ROOM
   socket.on(SOCKET_EVENTS.JOIN_ROOM, (conversationID) => {
-    if (socket.rooms.has(conversationID)) return;
+    console.log('room-join:', conversationID, 'User:', user?._id)
+
+    // if (socket.rooms.has(conversationID)) return;
 
     socket.join(conversationID);
   });
 
   // leave SOCKET ROOM
   socket.on(SOCKET_EVENTS.LEAVE_ROOM, async (conversationId) => {
+
     if (socket.rooms.has(conversationId)) {
+      console.log('room-leave:', conversationId, 'User:', user?._id)
       socket.leave(conversationId);
       socket.rooms.delete(conversationId);
     }
