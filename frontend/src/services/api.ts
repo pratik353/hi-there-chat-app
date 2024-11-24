@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseUrl =  "/api/v1/";  
-export const socketUrl = "ws://";
+export const socketUrl = import.meta.env.VITE_NODE_ENV == "development" ? "ws://" : "wss://"; // replace with your
 
 export const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/auto/upload`;
 export const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
