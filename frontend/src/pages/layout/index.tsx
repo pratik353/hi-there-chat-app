@@ -117,6 +117,9 @@ export default function Layout() {
                       src={userDetails?.data?.profilePic}
                       className=" object-cover"
                     />
+                    <AvatarFallback>
+                      {userDetails?.data?.name.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                 </TooltipComponent>
               </div>
@@ -126,7 +129,6 @@ export default function Layout() {
                     className="p-x-4 "
                     onClick={() => {
                       socketInstance?.disconnect();
-                      debugger
                       localStorage.clear();
                       window.location.href = "/login";
                     }}

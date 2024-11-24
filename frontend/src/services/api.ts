@@ -34,7 +34,6 @@ authInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log(error, "error in interceptor");
     if (error.response && error.response.status == 401) {
       localStorage.clear();
       window.location.href = "/login";

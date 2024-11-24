@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import * as yup from "yup";
 import { useFormik } from "formik";
@@ -20,6 +20,7 @@ const validationSchema = yup.object().shape({
 });
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const { values, handleChange, handleSubmit, handleBlur, errors, touched } =
@@ -31,10 +32,10 @@ const RegisterPage = () => {
       },
       async onSubmit(values) {
         try {
-          // TO DO: Implement API call to create user
           const response = await instance.post("/user/register", values);
           if (response.data.success) {
             toast.success(" User register successfully");
+            navigate('/login')
           }
         } catch (error) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -44,8 +45,6 @@ const RegisterPage = () => {
       },
       validationSchema,
     });
-
-  console.log(errors, "errors");
 
   return (
     <div className="h-screen flex justify-center items-center">

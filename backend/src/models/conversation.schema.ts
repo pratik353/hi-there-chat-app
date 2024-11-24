@@ -15,7 +15,6 @@ const conversationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    //TODO
     isPublic: {
       type: Boolean,
       default: false,
@@ -27,10 +26,6 @@ const conversationSchema = new mongoose.Schema(
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    },
-    messages:{
-      type:[mongoose.Schema.Types.ObjectId],
-      ref:'Message'
     }
   },
   {

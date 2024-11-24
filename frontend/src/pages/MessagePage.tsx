@@ -35,9 +35,6 @@ const MessagePage = () => {
   const { data, error, isLoading } = useGetConversationDetails(conversationId);
   const conversation = data?.data;
 
-  console.log(error, "Error:");
-  console.log(isLoading, "Loading:");
-
   const { mutate } = useDeleteConversation();
   const { mutate: joinGroupMutate } = useUpdateConversation();
 
@@ -302,13 +299,15 @@ const MessagePage = () => {
                     >
                       {loggedInUser.id != message.sender?._id ? (
                         <div className="relative">
-                          <div
-                            className={`absolute top-0 right-0 z-10 h-3 w-3 border border-white rounded-full ${
-                              onlineUsers.includes(message.sender._id)
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                            }`}
-                          ></div>
+                          {conversation?.isGroup ? (
+                            <div
+                              className={`absolute top-0 right-0 z-10 h-3 w-3 border border-white rounded-full ${
+                                onlineUsers.includes(message?.sender?._id)
+                                  ? "bg-green-500"
+                                  : "bg-red-500"
+                              }`}
+                            ></div>
+                          ) : null}
                           <Avatar className="h-10 w-10 border">
                             <AvatarImage src={message?.sender?.profilePic} />
                             <AvatarFallback>

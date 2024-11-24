@@ -23,7 +23,6 @@ export async function userMiddleware(
     req.user = user;
     next();
   } catch (error: any) {
-    console.log(error,'----->')
     res.status(401).json({ message: error.message });
   }
 }
