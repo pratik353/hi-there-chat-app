@@ -26,10 +26,10 @@ export const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 const io = new Server(server, {
-  cors: {
-    origin: "https://hi-there-7t7k.onrender.com/",
-    methods: ["GET", "POST"],
-  },
+  // cors: {
+  //   origin: "*",
+  //   methods: ["GET", "POST"],
+  // },
 });
 const onlineUser = new Set();
 
