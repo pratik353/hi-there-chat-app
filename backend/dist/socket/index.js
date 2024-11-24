@@ -15,10 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.server = exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
-const userManager_1 = require("./userManager");
 const user_schema_1 = require("../models/user.schema");
-const conversation_schema_1 = require("../models/conversation.schema");
 const message_schema_1 = __importDefault(require("../models/message.schema"));
+const conversation_schema_1 = require("../models/conversation.schema");
 var SOCKET_EVENTS;
 (function (SOCKET_EVENTS) {
     SOCKET_EVENTS["JOIN_ROOM"] = "joinroom";
@@ -27,6 +26,7 @@ var SOCKET_EVENTS;
     SOCKET_EVENTS["ONLINE_USERS"] = "onlineusers";
     SOCKET_EVENTS["PREV_MESSAGES"] = "prevmessages";
     SOCKET_EVENTS["LEAVE_ROOM"] = "leaveroom";
+    SOCKET_EVENTS["USER_NOT_IN_GROUP"] = "notaccess";
 })(SOCKET_EVENTS || (SOCKET_EVENTS = {}));
 const port = 3000;
 exports.app = (0, express_1.default)();
@@ -41,26 +41,27 @@ const io = new Server(exports.server, {
 });
 const onlineUser = new Set();
 io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
-    const userRooms = [];
     const token = socket.handshake.auth.token;
     const socketId = socket.id;
     const user = yield user_schema_1.UserModel.findOne({
         token: token,
     }).select("-password");
-    // console.log("user connected", user?.email);
     if (!user)
         return;
-    let joinedUser = new userManager_1.User(socket, user);
     onlineUser.add(user._id);
     io.emit(SOCKET_EVENTS.ONLINE_USERS, Array.from(onlineUser).map((u) => u._id));
     socket.on("error", console.error);
     socket.on(SOCKET_EVENTS.DISCONNECT, () => {
-        console.log('disconnecting', joinedUser.user);
-        console.log(joinedUser.user.email);
-        onlineUser.delete(joinedUser.user._id);
+        onlineUser.delete(user._id);
         io.emit(SOCKET_EVENTS.ONLINE_USERS, Array.from(onlineUser).map((u) => u._id));
+        // leave all rooms after disconnected
+        socket.rooms.forEach((room) => {
+            socket.leave(room);
+            socket.rooms.delete(room);
+        });
         socket.disconnect(true);
     });
+    // send previous messages to user
     socket.on(SOCKET_EVENTS.PREV_MESSAGES, (conversationId) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const messages = yield message_schema_1.default.find({
@@ -77,27 +78,25 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
             console.log("Socket Error:- ", error);
         }
     }));
-    socket.on(SOCKET_EVENTS.LEAVE_ROOM, (conversationId) => __awaiter(void 0, void 0, void 0, function* () {
-        socket.leave(conversationId);
-    }));
+    // ADD NEW MESSAGE IN DB AND SEND TO ALL USERS IN ROOM
     socket.on(SOCKET_EVENTS.NEW_MESSAGE, (event) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(event, "new-message");
         const { conversationId, message, type, mediaUrl } = event;
         if (!conversationId)
             return;
+        const userInConversation = yield conversation_schema_1.ConversationModel.findOne({
+            _id: conversationId,
+        }).populate("participants");
+        if (!(userInConversation === null || userInConversation === void 0 ? void 0 : userInConversation.participants.map(u => u._id.toString()).includes(user._id.toString())))
+            return console.log('Error: User does not have access ', user === null || user === void 0 ? void 0 : user.email);
         const newMessage = new message_schema_1.default({
             conversation: conversationId,
-            sender: joinedUser.user._id,
+            sender: user._id,
             text: message,
             videoUrl: type === "video" ? mediaUrl : "",
             imageUrl: type === "image" ? mediaUrl : "",
         });
         // Save the new message
         yield newMessage.save();
-        // Update the conversation to include the new message
-        yield conversation_schema_1.ConversationModel.findByIdAndUpdate(conversationId, {
-            $push: { messages: newMessage._id },
-        });
         // Fetch the conversation with populated messages
         const messages = yield message_schema_1.default.find({
             conversation: conversationId,
@@ -105,18 +104,19 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
             path: "sender",
             select: ["name", "profilePic"], // Excludes the conversations field
         });
-        // console.log(conversation, "conversation");
-        yield newMessage.save();
-        if (!messages)
-            return;
-        console.log(io.sockets.adapter.rooms, "--rooms");
         io.to(conversationId).emit(SOCKET_EVENTS.PREV_MESSAGES, messages);
     }));
-    // Room in socket.io
+    // JOIN SOCKET ROOM
     socket.on(SOCKET_EVENTS.JOIN_ROOM, (conversationID) => {
-        console.log("--->");
-        console.log(conversationID, "join-room");
-        userRooms.push(conversationID);
+        if (socket.rooms.has(conversationID))
+            return;
         socket.join(conversationID);
     });
+    // leave SOCKET ROOM
+    socket.on(SOCKET_EVENTS.LEAVE_ROOM, (conversationId) => __awaiter(void 0, void 0, void 0, function* () {
+        if (socket.rooms.has(conversationId)) {
+            socket.leave(conversationId);
+            socket.rooms.delete(conversationId);
+        }
+    }));
 }));

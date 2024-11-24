@@ -33,6 +33,9 @@ const RegisterPage = () => {
         try {
           // TO DO: Implement API call to create user
           const response = await instance.post("/user/register", values);
+          if (response.data.success) {
+            toast.success(" User register successfully");
+          }
         } catch (error) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore

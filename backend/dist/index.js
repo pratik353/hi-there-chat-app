@@ -31,8 +31,8 @@ socket_1.app.use("/api/v1/conversation", conversation_routes_1.conversationRoute
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         yield new Promise((resolve) => {
-            socket_1.server.listen(80, "192.168.29.211", () => {
-                // server.listen(3000, () => {
+            // server.listen(80,/* "192.168.101.5" */, () => {
+            socket_1.server.listen(3000, () => {
                 console.log(`Example app listening at http://localhost:${port}`);
                 resolve("");
             });

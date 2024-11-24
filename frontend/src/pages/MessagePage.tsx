@@ -2,15 +2,8 @@ import InputField from "@/components/form/InputField";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/redux/store/store";
-import { authInstance, cloudinaryUrl } from "@/services/api";
-import {
-  Cross,
-  Delete,
-  EllipsisVertical,
-  PlusCircle,
-  Trash,
-  X,
-} from "lucide-react";
+import { cloudinaryUrl } from "@/services/api";
+import { PlusCircle, Trash, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -56,7 +49,7 @@ const MessagePage = () => {
 
   const [openConversationInfo, setOpenConversationInfo] = useState(false);
   const [openSheet, setOpenSheet] = useState(false);
-  const [openMediaOptions, setMediaOptions] = useState(false);
+  const [openMediaOptions, setOpenMediaOptions] = useState(false);
 
   const [mediaUrl, setMediaUrl] = useState<
     { url: string; type: "image" | "video" } | undefined
@@ -65,6 +58,10 @@ const MessagePage = () => {
   // const [conversation, setConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>(["new message"]);
   const [newMessage, setNewMessage] = useState("");
+
+  const userInGroup = conversation?.participants
+    .map((u) => u._id)
+    .includes(loggedInUser?.id);
 
   useEffect(() => {
     if (socketInstance && conversationId) {
@@ -79,7 +76,7 @@ const MessagePage = () => {
         setMessages(messages);
       });
     }
-  }, [socketInstance, conversationId]);
+  }, [socketInstance, conversationId, data, userInGroup]);
 
   if (isLoading) {
     return <Loading />;
@@ -128,7 +125,7 @@ const MessagePage = () => {
         } else if (pickedFile.type.startsWith("video/")) {
           setMediaUrl({ url: response.data.secure_url, type: "video" });
         }
-        setMediaOptions(false);
+        setOpenMediaOptions(false);
       } catch (error) {
         toast.error(error?.message);
         console.log(error);
@@ -143,10 +140,6 @@ const MessagePage = () => {
       inputRef.current?.click();
     }
   };
-
-  const userInGroup = conversation?.participants
-    .map((u) => u._id)
-    .includes(loggedInUser?.id);
 
   return (
     <div className="flex flex-col gap-y-2 ">
@@ -207,7 +200,9 @@ const MessagePage = () => {
           </div>
         </div>
         <div>
-          {loggedInUser.id != conversation?.admin && userInGroup ? (
+          {loggedInUser.id != conversation?.admin &&
+          userInGroup &&
+          tab == "groups" ? (
             <p
               className="px-4 py-2 bg-[#f18478] rounded-3xl cursor-pointer"
               onClick={() => {
@@ -221,9 +216,8 @@ const MessagePage = () => {
                       toast.error(err.response.data.message);
                     },
                     onSuccess: (res) => {
-                      if (res.data.data.success) {
+                      if (res.data.success) {
                         toast.success("Group leaved Successfully");
-                        socketInstance?.emit("leaveroom", conversationId);
                       }
                     },
                   }
@@ -246,6 +240,7 @@ const MessagePage = () => {
                     },
                     onSuccess: (res) => {
                       if (res.data.success) {
+                        toast.success("Group deleted Successfully");
                         navigate(
                           tab == "chats" ? "/chats/personal" : "/chats/groups"
                         );
@@ -288,7 +283,9 @@ const MessagePage = () => {
         <div className="h-full p-3 bg-white rounded-2xl flex flex-col gap-2">
           <div
             id="messages"
-            className="flex-1 overflow-y-auto  scrollbar-medium"
+            className={`flex-1 overflow-y-auto  scrollbar-medium ${
+              !userInGroup ? "blur-sm" : ""
+            }`}
           >
             <ul className="flex flex-col flex-grow">
               {messages.length > 0 ? (
@@ -304,16 +301,27 @@ const MessagePage = () => {
                       key={message._id}
                     >
                       {loggedInUser.id != message.sender?._id ? (
-                        <Avatar className="h-10 w-10 border">
-                          <AvatarImage src={message?.sender?.profilePic} />
-                          <AvatarFallback>
-                            {conversation?.isGroup
-                              ? conversation?.groupName.substring(0, 2)
-                              : conversation?.participants
-                                  ?.filter((u) => u._id != loggedInUser?.id)[0]
-                                  .name.substring(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <div
+                            className={`absolute top-0 right-0 z-10 h-3 w-3 border border-white rounded-full ${
+                              onlineUsers.includes(message.sender._id)
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          ></div>
+                          <Avatar className="h-10 w-10 border">
+                            <AvatarImage src={message?.sender?.profilePic} />
+                            <AvatarFallback>
+                              {conversation?.isGroup
+                                ? conversation?.groupName.substring(0, 2)
+                                : conversation?.participants
+                                    ?.filter(
+                                      (u) => u._id != loggedInUser?.id
+                                    )[0]
+                                    .name.substring(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
                       ) : null}
                       <div
                         className={`py-2 px-1 rounded-xl ${
@@ -368,7 +376,7 @@ const MessagePage = () => {
               <div className="relative">
                 <PlusCircle
                   className="cursor-pointer"
-                  onClick={() => setMediaOptions(!openMediaOptions)}
+                  onClick={() => setOpenMediaOptions(!openMediaOptions)}
                 />
                 {openMediaOptions && (
                   <div className="absolute bottom-9 w-[150px] rounded-lg p-3 border bg-[#f1f2f7] shadow-sm">

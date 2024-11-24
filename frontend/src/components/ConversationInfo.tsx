@@ -92,8 +92,8 @@ const ConversationInfo = ({ isOpen, onClose, data }: Props) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={onClose} >
+      <DialogContent className="max-h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             <div className=" flex flex-col items-center gap-2">
@@ -249,6 +249,7 @@ const ConversationInfo = ({ isOpen, onClose, data }: Props) => {
                       onSuccess: (res) => {
                         if (res.data.data.success) {
                           toast.success("Member added Successfully");
+                          setSelectedUsers([])
                         }
                       },
                     }

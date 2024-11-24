@@ -37,9 +37,10 @@ const LoginPage = () => {
             toast.error(err.response.data.message);
           },
           onSuccess: (res) => {
-            if (res.data.data.success) {
+            if (res.data.success) {
               localStorage.setItem("token", res.data.data.token);
               localStorage.setItem("user", JSON.stringify(res.data.data.user));
+              toast.success(" Login Success");
               navigate("/chats/personal");
             }
           },

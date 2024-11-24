@@ -45,13 +45,13 @@ authRouter.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
         res.json({
             message: "User logged in successfully",
+            success: true,
             data: {
                 user: {
                     id: user._id,
                     name: user.name,
                     email: user.email,
                 },
-                success: true,
                 token,
             },
         });

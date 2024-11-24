@@ -77,84 +77,6 @@ export default function Layout() {
     <>
       <div className="flex bg-[#F5F6FA] gap-x-2 ">
         <aside className={`w-[26rem] h-screen flex`}>
-          {/* Header */}
-          {/* <div className="h-20 flex justify-between w-full p-2 items-center ">
-            <div
-              className="cursor-pointer flex gap-x-2 items-center"
-              onClick={() => setOpenUserInfo(true)}
-            >
-              <Avatar>
-                <AvatarImage src={userDetails?.data.profilePic} />
-              </Avatar>
-              <div className="leading-tight">
-                <p className="text-lg font-bold">{userDetails?.data.name}</p>
-                <span className="text-sm">{userDetails?.data.email}</span>
-              </div>
-            </div>
-            <div className="cursor-pointer" onClick={() => setOpen(true)}>
-              <MessageSquarePlus />
-            </div>
-          </div> */}
-          {/* <div className="flex-1 flex flex-col justify-between bg-[#FFFFFF] shadow-md rounded-3xl px-3 py-3 ">
-            <div className="">
-              <input
-                className="pl-2 border h-10 w-full rounded-2xl bg-[#F5F6FA]"
-                placeholder="search conversation"
-              />
-              <ul className="pt-2 flex flex-col gap-y-2">
-                {data?.data.data.map((x: any) => {
-                  return (
-                    <li
-                      key={x._id}
-                      className={`py-2 cursor-pointer hover:bg-slate-200 hover:scale-105 flex gap-2 shadow-sm ${
-                        conversationId == x._id ? "bg-[#DEEDFF] scale-105" : ""
-                      } rounded-lg pl-2`}
-                      onClick={() => {
-                        navigate(`/chat/${x._id}`);
-                      }}
-                    >
-                      <Avatar className="">
-                        <AvatarImage
-                          src={
-                            !x.isGroup
-                              ? x.participants.filter(
-                                  (u) => u._id != loggedInUser.id
-                                )[0].profilePic
-                              : x.groupImage
-                          }
-                        />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-bold">
-                          {" "}
-                          {!x.isGroup
-                            ? x.participants.filter(
-                                (u) => u._id != loggedInUser.id
-                              )[0].name
-                            : x.groupName}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <p onClick={()=>{
-              socketInstance?.disconnect();
-            }}>disconnect from socket</p>
-            <div className="cursor-pointer flex p-2 w-full gap-2 justify-center">
-              <LogOutIcon
-                className="p-x-4 "
-                onClick={() => {
-                  socketInstance?.disconnect();
-                  localStorage.clear();
-                  window.location.href = "/login";
-                }}
-              />
-              <p>Logout</p>
-            </div>
-          </div> */}
           <div className=" w-20 flex flex-col gap-4 items-center pt-4 bg-[#E8F1FC]  ">
             <div className="flex-1">
               <NavigationTab
@@ -204,6 +126,7 @@ export default function Layout() {
                     className="p-x-4 "
                     onClick={() => {
                       socketInstance?.disconnect();
+                      debugger
                       localStorage.clear();
                       window.location.href = "/login";
                     }}
