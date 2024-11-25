@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl =  import.meta.env.VITE_NODE_ENV == "development" ? "http://localhost:3000/api/v1/" :"/api/v1/";  
+const baseUrl = "/api/v1/";  
 export const socketUrl = "wss://"; // replace with your
 
 console.log(socketUrl,'socketUrl')
